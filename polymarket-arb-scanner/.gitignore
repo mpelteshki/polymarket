@@ -1,0 +1,17 @@
+/.DS_Store
+/Archive.zip
+__pycache__/
+/target/
+/.playwright-mcp/
+/.playwright-cli/
+/.pm-trader-scanner/
+/runtime_diagnostics/
+/paper_campaign/
+/output/
+/paper_trades.json
+
+.env
+*.local
+
+/dashboard/node_modules/
+/dashboard/dist/

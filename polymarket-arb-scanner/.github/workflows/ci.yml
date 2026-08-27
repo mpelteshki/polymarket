@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install pinned Rust toolchain
+        run: rustup toolchain install 1.94.0 --profile minimal --component clippy,rustfmt
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Lint Rust
+        run: cargo clippy --locked --all-targets --all-features -- -D warnings
+
+      - name: Test Rust
+        run: cargo test --locked --all-targets
+
+      - name: Test profitability evidence gate
+        run: python3 -m unittest tests/test_paper_profitability_gate.py
+
+      - name: Test cross-venue shadow evaluator
+        run: |
+          python3 -m py_compile scripts/cross_venue_shadow.py
+          python3 -m unittest tests/test_cross_venue_shadow.py
+
+      - name: Validate shell syntax
+        run: |
+          for script in scripts/*.sh; do
+            bash -n "$script"
+          done
+
+      - name: Lint shell safety errors
+        run: shellcheck --severity=error scripts/*.sh
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+
+      - name: Install dashboard dependencies
+        working-directory: dashboard
+        run: npm ci
+
+      - name: Audit dashboard dependencies
+        working-directory: dashboard
+        run: npm audit --audit-level=high
+
+      - name: Lint dashboard
+        working-directory: dashboard
+        run: npm run lint
+
+      - name: Build dashboard
+        working-directory: dashboard
+        run: npm run build
+
+  rust-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install pinned Rust toolchain
+        run: rustup toolchain install 1.94.0 --profile minimal
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --version 0.22.2 --locked
+
+      - name: Audit Rust dependencies
+        run: cargo audit --file Cargo.lock

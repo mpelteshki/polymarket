@@ -1,0 +1,57 @@
+[package]
+name = "polymarket-arb-scanner"
+version = "1.0.0"
+edition = "2021"
+description = "Conservative Polymarket arbitrage scanner for mispriced mutually-exclusive events"
+
+[dependencies]
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+futures = "0.3"
+
+# HTTP client
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
+tokio-tungstenite = { version = "0.24", features = ["rustls-tls-native-roots", "url"] }
+rustls = { version = "0.23.38", default-features = false, features = ["aws_lc_rs", "std"] }
+url = "2.5"
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+csv = "1"
+zip = "2"
+
+# CLI
+clap = { version = "4", features = ["derive"] }
+
+# Environment / config
+dotenvy = "0.15"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# UUIDs for trade IDs
+uuid = { version = "1", features = ["v4"] }
+
+# File locking for paper trades
+anyhow = "1"
+libc = "0.2"
+
+# Official Polymarket Rust SDK V2 for authenticated order execution and pUSD CTF closeout.
+polymarket_client_sdk_v2 = { version = "0.6.0", features = ["clob", "ctf", "data", "heartbeats"] }
+alloy = { version = "1.6.3", default-features = false, features = ["providers", "reqwest", "reqwest-rustls-tls", "signer-local", "signers"] }
+regex = "1.12.3"
+good_lp = { version = "1.15.1", default-features = false, features = ["minilp"] }
+rayon = "1.10"
+
+[dev-dependencies]
+httpmock = "0.8"
+
+[profile.release]
+opt-level = 3
+lto = true

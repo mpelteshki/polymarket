@@ -1,0 +1,3 @@
+[submodule "Claude-Plugin-Marketplace-for-Polymarket"]
+	path = Claude-Plugin-Marketplace-for-Polymarket
+	url = https://github.com/harish-garg/Claude-Plugin-Marketplace-for-Polymarket.git
