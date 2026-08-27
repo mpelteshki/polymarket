@@ -1,4 +1,4 @@
-name: CI
+name: Polymarket CI
 
 on:
   push:
@@ -19,51 +19,58 @@ jobs:
         run: rustup toolchain install 1.94.0 --profile minimal --component clippy,rustfmt
 
       - name: Check formatting
+        working-directory: polymarket-arb-scanner
         run: cargo fmt --all -- --check
 
       - name: Lint Rust
+        working-directory: polymarket-arb-scanner
         run: cargo clippy --locked --all-targets --all-features -- -D warnings
 
       - name: Test Rust
+        working-directory: polymarket-arb-scanner
         run: cargo test --locked --all-targets
 
       - name: Test profitability evidence gate
+        working-directory: polymarket-arb-scanner
         run: python3 -m unittest tests/test_paper_profitability_gate.py
 
       - name: Test cross-venue shadow evaluator
+        working-directory: polymarket-arb-scanner
         run: |
           python3 -m py_compile scripts/cross_venue_shadow.py
           python3 -m unittest tests/test_cross_venue_shadow.py
 
       - name: Validate shell syntax
+        working-directory: polymarket-arb-scanner
         run: |
           for script in scripts/*.sh; do
             bash -n "$script"
           done
 
       - name: Lint shell safety errors
+        working-directory: polymarket-arb-scanner
         run: shellcheck --severity=error scripts/*.sh
 
       - uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: dashboard/package-lock.json
+          cache-dependency-path: polymarket-arb-scanner/dashboard/package-lock.json
 
       - name: Install dashboard dependencies
-        working-directory: dashboard
+        working-directory: polymarket-arb-scanner/dashboard
         run: npm ci
 
       - name: Audit dashboard dependencies
-        working-directory: dashboard
+        working-directory: polymarket-arb-scanner/dashboard
         run: npm audit --audit-level=high
 
       - name: Lint dashboard
-        working-directory: dashboard
+        working-directory: polymarket-arb-scanner/dashboard
         run: npm run lint
 
       - name: Build dashboard
-        working-directory: dashboard
+        working-directory: polymarket-arb-scanner/dashboard
         run: npm run build
 
   rust-security:
@@ -80,4 +87,5 @@ jobs:
         run: cargo install cargo-audit --version 0.22.2 --locked
 
       - name: Audit Rust dependencies
+        working-directory: polymarket-arb-scanner
         run: cargo audit --file Cargo.lock
